@@ -1,7 +1,6 @@
 package cs2901.utec.chat_mobile;
 
 import android.app.Activity;
-import android.content.ComponentCallbacks;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -35,8 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-    public Activity getActivity()
-    {
+    public Activity getActivity(){
         return this;
     }
 
@@ -58,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
         // 4. Sending json message to Server
         JsonObjectRequest request = new JsonObjectRequest(
             Request.Method.POST,
-            "http://10.0.2.2:5000/authenticate",
+            "http://10.0.2.2:8000/authenticate",
             jsonMessage,
             new Response.Listener<JSONObject>() {
                 @Override
@@ -68,7 +66,7 @@ public class LoginActivity extends AppCompatActivity {
                         String message = response.getString("message");
                         if(message.equals("Authorized")) {
                             showMessage("Authenticated");
-                            Intent intent = new Intent(getActivity(),ContactsActivity.class);
+                            Intent intent = new Intent(getActivity(), ContactsActivity.class);
                             startActivity(intent);
                         }
                         else {
