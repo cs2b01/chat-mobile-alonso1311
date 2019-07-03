@@ -1,14 +1,11 @@
 package cs2901.utec.chat_mobile;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
-import android.widget.Toast;
-
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -16,89 +13,69 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
 public class ContactsActivity extends AppCompatActivity {
+
+    RecyclerView mRecyclerView;
+    RecyclerView.Adapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacts);
-    }
-    public void showUser(View view) {
-
-    }
-
-    public class MyActivity extends Activity {
-        private RecyclerView recyclerView;
-        private RecyclerView.Adapter mAdapter;
-        private RecyclerView.LayoutManager layoutManager;
-
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.my_activity);
-            recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-
-            // use this setting to improve performance if you know that changes
-            // in content do not change the layout size of the RecyclerView
-            recyclerView.setHasFixedSize(true);
-
-            // use a linear layout manager
-            layoutManager = new LinearLayoutManager(this);
-            recyclerView.setLayoutManager(layoutManager);
-
-            // specify an adapter (see also next example)
-            mAdapter = new MyAdapter(myDataset);
-            recyclerView.setAdapter(mAdapter);
-        }
+        mRecyclerView = findViewById(R.id.main_recycler_view);
+        setTitle("@"+getIntent().getExtras().get("username").toString());
     }
 
-    public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
-        private String[] mDataset;
+    @Override
+    protected void onResume(){
+        super.onResume();
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        getUsers();
+    }
 
-        // Provide a reference to the views for each data item
-        // Complex data items may need more than one view per item, and
-        // you provide access to all the views for a data item in a view holder
-        public static class MyViewHolder extends RecyclerView.ViewHolder {
-            // each data item is just a string in this case
-            public TextView textView;
-            public MyViewHolder(TextView v) {
-                super(v);
-                textView = v;
+    public Activity getActivity(){
+        return this;
+    }
+
+    public void getUsers(){
+        String url = "http://10.100.227.208:8080/users";
+        RequestQueue queue = Volley.newRequestQueue(this);
+        Map<String, String> params = new HashMap();
+        JSONObject parameters = new JSONObject(params);
+        final String userId = getIntent().getExtras().get("user_id").toString();
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                Request.Method.GET,
+                url,
+                parameters,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray data = response.getJSONArray("data");
+                            mAdapter = new ChatAdapter(data, getActivity(), userId);
+                            mRecyclerView.setAdapter(mAdapter);
+
+                        }catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // TODO: Handle error
+                error.printStackTrace();
+
             }
-        }
+        });
+        queue.add(jsonObjectRequest);
 
-        // Provide a suitable constructor (depends on the kind of dataset)
-        public MyAdapter(String[] myDataset) {
-            mDataset = myDataset;
-        }
-
-        // Create new views (invoked by the layout manager)
-        @Override
-        public MyAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
-                                                         int viewType) {
-            // create a new view
-            TextView v = (TextView) LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.my_text_view, parent, false);
-
-            MyViewHolder vh = new MyViewHolder(v);
-            return vh;
-        }
-
-        // Replace the contents of a view (invoked by the layout manager)
-        @Override
-        public void onBindViewHolder(MyViewHolder holder, int position) {
-            // - get element from your dataset at this position
-            // - replace the contents of the view with that element
-            holder.textView.setText(mDataset[position]);
-
-        }
-
-        // Return the size of your dataset (invoked by the layout manager)
-        @Override
-        public int getItemCount() {
-            return mDataset.length;
-        }
     }
+
 }
