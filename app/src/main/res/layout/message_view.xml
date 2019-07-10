@@ -12,6 +12,7 @@
         android:gravity="left"
         >
         <TextView
+            android:background="#C0C0C0"
             android:id="@+id/element_view_friend_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -19,10 +20,13 @@
             android:textColor="#012"
             />
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:gravity="right">
         <TextView
+            android:background="#CD853F"
             android:id="@+id/element_view_me_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

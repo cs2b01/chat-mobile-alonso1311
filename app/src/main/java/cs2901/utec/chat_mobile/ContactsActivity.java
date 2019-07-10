@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class ContactsActivity extends AppCompatActivity {
 
     RecyclerView mRecyclerView;
+    RecyclerView.LayoutManager mLayoutManager;
     RecyclerView.Adapter mAdapter;
 
     @Override
@@ -44,7 +46,7 @@ public class ContactsActivity extends AppCompatActivity {
     }
 
     public void getUsers(){
-        String url = "http://10.0.2.2:8000/users";
+        String url = "http://10.0.2.2:5000/users";
         RequestQueue queue = Volley.newRequestQueue(this);
         Map<String, String> params = new HashMap();
         JSONObject parameters = new JSONObject(params);
