@@ -1,11 +1,13 @@
 package cs2901.utec.chat_mobile;
 
 import android.app.Activity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.android.volley.Request;
@@ -38,12 +40,12 @@ public class MessageActivity extends AppCompatActivity {
         String username = getIntent().getExtras().get("username").toString();
         setTitle("@"+username);
         mRecyclerView = findViewById(R.id.main_recycler_view);
+        refresh();
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         getChats();
     }
@@ -55,7 +57,7 @@ public class MessageActivity extends AppCompatActivity {
     public void getChats(){
         final String userFromId = getIntent().getExtras().get("user_from_id").toString();
         String userToId = getIntent().getExtras().get("user_to_id").toString();
-        String url = "http://10.100.227.208:8080/chats/<user_from_id>/<user_to_id>";
+        String url = "http://10.0.2.2:5000/chats/<user_from_id>/<user_to_id>";
         url = url.replace("<user_from_id>", userFromId);
         url = url.replace("<user_to_id>", userToId);
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -72,6 +74,7 @@ public class MessageActivity extends AppCompatActivity {
                             int uID = Integer.parseInt(userFromId);
                             mAdapter = new MyMessageAdapter(data, getActivity(), uID);
                             mRecyclerView.setAdapter(mAdapter);
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -88,7 +91,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     public void postMessage(){
-        String url = "http://10.100.227.208:8080/messages";
+        final String url = "http://10.0.2.2:5000/messages";
         RequestQueue queue = Volley.newRequestQueue(this);
         Map<String, String> params = new HashMap();
         final String user_from_id = getIntent().getExtras().get("user_from_id").toString();
@@ -105,7 +108,9 @@ public class MessageActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+
                         // TODO
+
                     }
                 }, new Response.ErrorListener() {
 
@@ -117,6 +122,20 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
         queue.add(jsonObjectRequest);
+        getChats();
+        ((EditText) findViewById(R.id.txtMessage)).setText("");
 
     }
+    public void refresh(){
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getChats();
+                refresh();
+            }
+        }, 5000);
+
+    }
+
+
 }

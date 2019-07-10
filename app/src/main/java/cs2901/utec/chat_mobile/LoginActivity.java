@@ -1,6 +1,8 @@
 package cs2901.utec.chat_mobile;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentCallbacks;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -34,7 +36,8 @@ public class LoginActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-    public Activity getActivity(){
+    public Activity getActivity()
+    {
         return this;
     }
 
@@ -55,48 +58,49 @@ public class LoginActivity extends AppCompatActivity {
 
         // 4. Sending json message to Server
         JsonObjectRequest request = new JsonObjectRequest(
-            Request.Method.POST,
-            "http://10.100.227.208:8080/authenticate",
-            jsonMessage,
-            new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    //TODO
-                    try {
-                        String message = response.getString("message");
-                        if(message.equals("Authorized")) {
-                            showMessage("Authenticated");
-                            Intent intent = new Intent(getActivity(), ContactsActivity.class);
-                            intent.putExtra("user_id", response.getInt("user_id"));
-                            intent.putExtra("username", response.getString("username"));
-                            startActivity(intent);
+                Request.Method.POST,
+                "http://10.0.2.2:5000/authenticate",
+                jsonMessage,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        //TODO
+                        try {
+                            String message = response.getString("message");
+                            if(message.equals("Authorized")) {
+                                showMessage("Authenticated");
+                                EditText txtUsername = (EditText) findViewById(R.id.txtUsername);
+                                String username = txtUsername.getText().toString();
+                                Intent intent = new Intent(getActivity(), ContactsActivity.class);
+                                intent.putExtra("user_id", response.getInt("user_id"));
+                                intent.putExtra("username", username);
+                                startActivity(intent);
+                            }
+                            else {
+                                showMessage("Wrong username or password");
+                            }
+                            showMessage(response.toString());
+                        }catch (Exception e) {
+                            e.printStackTrace();
+                            showMessage(e.getMessage());
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        if( error instanceof  AuthFailureError ){
+                            showMessage("Unauthorized");
                         }
                         else {
-                            showMessage("Wrong username or password");
+                            showMessage(error.getMessage());
                         }
-                        showMessage(response.toString());
-                    }catch (Exception e) {
-                        e.printStackTrace();
-                        showMessage(e.getMessage());
                     }
                 }
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    error.printStackTrace();
-                    if( error instanceof  AuthFailureError ){
-                        showMessage("Unauthorized");
-                    }
-                    else {
-                        showMessage(error.getMessage());
-                    }
-                }
-            }
         );
 
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
     }
-
 }
